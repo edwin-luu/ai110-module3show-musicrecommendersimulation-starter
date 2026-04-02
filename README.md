@@ -1,5 +1,68 @@
 # 🎵 Music Recommender Simulation
 
+## Personal Notes
+Collaborative Filtering: if Song X and Song Y frequently appear in the same playlists, they're considered related.
+  - "Users like you also liked..."
+  - Strength: surprise factor, discovery of unrelated songs for a person.
+  - Weakness: new listeners get zero recommendations; popular tracks may get favored.
+
+Content-Based Filtering: songs with similar characteristics are recommended.
+  - Strength: no listening history is required; just listen to one song and you get recommended something similar.
+  - Weakness: only recommended more of the "same" songs.
+
+
+
+Dataset Overview
+  - Your songs.csv has 10 songs with 7 features split into two types:
+
+  ┌──────────────┬───────────────┬─────────────────────────────────────────────────────────────────┬─────────────────┐
+  │   Feature    │     Type      │                          Range in Data                          │ Example Spread  │
+  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
+  │ genre        │ Categorical   │ 6 values (pop, lofi, rock, ambient, jazz, synthwave, indie pop) │ Discrete labels │
+  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
+  │ mood         │ Categorical   │ 5 values (happy, chill, intense, relaxed, focused, moody)       │ Discrete labels │
+  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
+  │ energy       │ Numeric (0-1) │ 0.28 – 0.93                                                     │ Wide spread     │
+  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
+  │ tempo_bpm    │ Numeric       │ 60 – 152                                                        │ Wide spread     │
+  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
+  │ valence      │ Numeric (0-1) │ 0.48 – 0.84                                                     │ Moderate spread │
+  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
+  │ danceability │ Numeric (0-1) │ 0.41 – 0.88                                                     │ Moderate spread │
+  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
+  │ acousticness │ Numeric (0-1) │ 0.05 – 0.92                                                     │ Wide spread     │
+  └──────────────┴───────────────┴─────────────────────────────────────────────────────────────────┴─────────────────┘
+
+  
+Feature-by-Feature Assessment
+  Tier 1: Strongest "Vibe" Indicators
+
+  genre + mood — These are the most intuitive, human-readable filters. When someone says "I want chill lofi," they're already using these two features. They act as coarse-grained filters that immediately narrow 
+  the field. In the dataset, the combination of genre+mood cleanly separates distinct listening contexts (study session vs. workout vs. driving).
+
+  energy — This is arguably the single most powerful numeric feature. It cleanly separates "Spacewalk Thoughts" (0.28, ambient chill) from "Gym Hero" (0.93, intense pop). Energy maps directly to how music feels 
+  physically — are you nodding off or bouncing? It also has the widest practical spread in the dataset.
+
+  Tier 2: Strong Supporting Features
+
+  acousticness — Has the widest numeric spread (0.05 to 0.92) and captures a real vibe divide: electronic/produced sounds vs. organic/intimate sounds. "Gym Hero" at 0.05 feels completely different from
+  "Spacewalk Thoughts" at 0.92, even beyond energy. The UserProfile already has likes_acoustic as a boolean, which shows the project designers considered this important.
+
+  valence — Measures musical positivity/happiness. "Sunrise City" (0.84) sounds uplifting; "Storm Runner" (0.48) sounds darker. This adds emotional nuance that mood alone can't capture — two "chill" songs can   
+  have different emotional tones.
+
+  Tier 3: Useful but Secondary
+
+  danceability — Matters in specific contexts (party playlists) but overlaps heavily with energy. In this dataset, high-energy songs tend to be high-danceability too. It adds less unique information.
+
+  tempo_bpm — Objectively measurable but less perceptually meaningful on its own. A 120 BPM pop song and a 120 BPM jazz song feel nothing alike. Tempo is also on a different scale (60-152) vs. the 0-1 features, 
+  so it needs normalization. Useful as a tiebreaker, not a primary signal.
+
+
+Implementation Prompt:
+- After reflecting, I want to do weighted features, which were catergorized by tiers (the exact weight it up in the air for now). Check out #file:README.md. Generate the implementation plan.
+- Without writing the implementation, generate robust test cases in the tests\test_recommender.py
+
 ## Project Summary
 
 In this project you will build and explain a small music recommender system.

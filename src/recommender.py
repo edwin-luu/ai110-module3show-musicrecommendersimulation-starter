@@ -57,8 +57,20 @@ def load_songs(csv_path: str) -> List[Dict]:
 def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
     """
     Functional implementation of the recommendation logic.
+    Score each song via score_song()
+        - Generate explanation for each song based on which features matched user_prefs
     Required by src/main.py
     """
     # TODO: Implement scoring and ranking logic
     # Expected return format: (song_dict, score, explanation)
     return []
+
+def score_song(user_prefs: Dict, song: Dict) -> float:
+    """
+    user_prefs dict has keys: genre, mood, energy (and optionally others)                                                                                                                                      │  
+    │ - For each feature in user_prefs:                                                                                                                                                                            │  
+    │   - Categorical: +1.0 if song[feature] == user_prefs[feature]                                                                                                                                                │  
+    │   - Numeric: +1 - abs(song[feature] - user_prefs[feature])                                                                                                                                                   │  
+    │ - Return total score (simple sum, equal weights) 
+    Required by src/main.py
+    """
