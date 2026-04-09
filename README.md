@@ -114,6 +114,10 @@ score = sum(weight[f] * similarity(user[f], song[f])) / sum(weight[f])
 
 Songs are ranked by score descending, and the top k are returned with human-readable explanations of why each song was recommended.
 
+### CLI Output
+
+![Recommendations output](recommendations_ss.jpg)
+
 ### Data Flow
 
 ```mermaid
