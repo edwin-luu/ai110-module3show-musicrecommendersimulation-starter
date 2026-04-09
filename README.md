@@ -1,76 +1,8 @@
 # 🎵 Music Recommender Simulation
 
-## Personal Notes
-Collaborative Filtering: if Song X and Song Y frequently appear in the same playlists, they're considered related.
-  - "Users like you also liked..."
-  - Strength: surprise factor, discovery of unrelated songs for a person.
-  - Weakness: new listeners get zero recommendations; popular tracks may get favored.
-
-Content-Based Filtering: songs with similar characteristics are recommended.
-  - Strength: no listening history is required; just listen to one song and you get recommended something similar.
-  - Weakness: only recommended more of the "same" songs.
-
-
-
-Dataset Overview
-  - Your songs.csv has 10 songs with 7 features split into two types:
-
-  ┌──────────────┬───────────────┬─────────────────────────────────────────────────────────────────┬─────────────────┐
-  │   Feature    │     Type      │                          Range in Data                          │ Example Spread  │
-  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
-  │ genre        │ Categorical   │ 6 values (pop, lofi, rock, ambient, jazz, synthwave, indie pop) │ Discrete labels │
-  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
-  │ mood         │ Categorical   │ 5 values (happy, chill, intense, relaxed, focused, moody)       │ Discrete labels │
-  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
-  │ energy       │ Numeric (0-1) │ 0.28 – 0.93                                                     │ Wide spread     │
-  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
-  │ tempo_bpm    │ Numeric       │ 60 – 152                                                        │ Wide spread     │
-  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
-  │ valence      │ Numeric (0-1) │ 0.48 – 0.84                                                     │ Moderate spread │
-  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
-  │ danceability │ Numeric (0-1) │ 0.41 – 0.88                                                     │ Moderate spread │
-  ├──────────────┼───────────────┼─────────────────────────────────────────────────────────────────┼─────────────────┤
-  │ acousticness │ Numeric (0-1) │ 0.05 – 0.92                                                     │ Wide spread     │
-  └──────────────┴───────────────┴─────────────────────────────────────────────────────────────────┴─────────────────┘
-
-  
-Feature-by-Feature Assessment
-  Tier 1: Strongest "Vibe" Indicators
-
-  genre + mood — These are the most intuitive, human-readable filters. When someone says "I want chill lofi," they're already using these two features. They act as coarse-grained filters that immediately narrow 
-  the field. In the dataset, the combination of genre+mood cleanly separates distinct listening contexts (study session vs. workout vs. driving).
-
-  energy — This is arguably the single most powerful numeric feature. It cleanly separates "Spacewalk Thoughts" (0.28, ambient chill) from "Gym Hero" (0.93, intense pop). Energy maps directly to how music feels 
-  physically — are you nodding off or bouncing? It also has the widest practical spread in the dataset.
-
-  Tier 2: Strong Supporting Features
-
-  acousticness — Has the widest numeric spread (0.05 to 0.92) and captures a real vibe divide: electronic/produced sounds vs. organic/intimate sounds. "Gym Hero" at 0.05 feels completely different from
-  "Spacewalk Thoughts" at 0.92, even beyond energy. The UserProfile already has likes_acoustic as a boolean, which shows the project designers considered this important.
-
-  valence — Measures musical positivity/happiness. "Sunrise City" (0.84) sounds uplifting; "Storm Runner" (0.48) sounds darker. This adds emotional nuance that mood alone can't capture — two "chill" songs can   
-  have different emotional tones.
-
-  Tier 3: Useful but Secondary
-
-  danceability — Matters in specific contexts (party playlists) but overlaps heavily with energy. In this dataset, high-energy songs tend to be high-danceability too. It adds less unique information.
-
-  tempo_bpm — Objectively measurable but less perceptually meaningful on its own. A 120 BPM pop song and a 120 BPM jazz song feel nothing alike. Tempo is also on a different scale (60-152) vs. the 0-1 features, 
-  so it needs normalization. Useful as a tiebreaker, not a primary signal.
-
-
 ## Project Summary
 
-In this project you will build and explain a small music recommender system.
-
-Your goal is to:
-
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
-
-Replace this paragraph with your own summary of what your version does.
+VibeFinder 1.0 is a content-based music recommender that scores songs from an 18-song catalog against a user's taste profile. It uses a tier-weighted scoring system where genre, mood, and energy (Tier 1) carry the most influence, acousticness and valence (Tier 2) add nuance, and danceability and tempo (Tier 3) serve as tiebreakers. The system returns ranked recommendations with plain-English explanations of why each song was chosen. It was built as a CodePath AI110 Module 3 project to explore how real-world recommenders turn data into predictions and where bias can emerge.
 
 ---
 
@@ -116,7 +48,7 @@ Songs are ranked by score descending, and the top k are returned with human-read
 
 ### CLI Output
 
-![Recommendations output](recommendations_ss.jpg)
+![Recommendations output](screenshots/recommendations_ss.jpg)
 
 ### Data Flow
 
@@ -191,12 +123,12 @@ Changed `genre` weight from 3.0 to 1.5 and `energy` weight from 2.5 to 5.0.
 
 ### Experiment 2: Diverse Profile Testing
 
-![High-Energy Pop](s4_1.jpg)
-![Chill Lofi](s4_2.jpg)
-![Deep Intense Rock](s4_3.jpg)
-![Conflicting: High-Energy Chill](s4_4.jpg)
-![Missing Genre: Classical](s4_5.jpg)
-![Numeric Only](s4_6.jpg)
+![High-Energy Pop](screenshots/s4_1.jpg)
+![Chill Lofi](screenshots/s4_2.jpg)
+![Deep Intense Rock](screenshots/s4_3.jpg)
+![Conflicting: High-Energy Chill](screenshots/s4_4.jpg)
+![Missing Genre: Classical](screenshots/s4_5.jpg)
+![Numeric Only](screenshots/s4_6.jpg)
 
 | Profile | Top Pick | Surprising? |
 |---|---|---|
@@ -233,115 +165,11 @@ See [model_card.md](model_card.md) for deeper analysis.
 
 [**Model Card**](model_card.md)
 
-Building this recommender taught me that the "algorithm" behind music recommendations is fundamentally a set of human choices disguised as math. Every weight I assigned — genre at 3.0, danceability at 0.75 — is a subjective opinion about what matters most when people pick music. The system doesn't "know" that rock and metal are related, or that a chill mood and a relaxed mood feel similar. It only knows what I told it, and the gaps in my definitions become the system's blind spots.
+**Biggest learning moment**: My biggest learning moment was running the weight experiment. I expected that doubling energy's weight would just shuffle a few ranks, but it completely changed which genres appeared in the top results for a rock listener. That showed me that recommender "fairness" isn't just about the data — it's baked into the weight choices, which are invisible to the end user. Every weight I assigned is a subjective opinion about what matters most when people pick music, and the gaps in my definitions become the system's blind spots.
 
-The bias risks became concrete when I tested edge cases. A user who likes "classical" gets zero genre matches because classical doesn't exist in the catalog — the system doesn't fail gracefully, it just quietly gives bad recommendations with moderate confidence scores. In a real product, this would disproportionately affect listeners of underrepresented genres. The "Conflicting" profile (lofi + high energy) showed how rigid categorical matching overrides numeric signals, meaning the system would rather recommend a wrong-energy song in the right genre than a right-energy song in the wrong genre. Whether that's a feature or a bug depends on the listener — and that ambiguity is exactly where real-world recommender bias lives.
+**How AI tools helped — and where I double-checked**: AI tools were most useful for scaffolding — generating the CSV expansion, drafting test cases, and structuring the model card. But I had to double-check the scoring math myself, especially around tempo normalization and the `likes_acoustic` bool-to-numeric conversion, because the AI didn't always account for edge cases like out-of-range BPM values. The tier weighting design was entirely my own analysis — I categorized the features by importance before asking for any implementation help.
 
+**What surprised me about simple algorithms**: It was surprising how a formula with just addition, subtraction, and division could produce recommendations that "feel" intelligent. When Sunrise City ranked #1 for a pop/happy user with a 0.99 score, it genuinely felt like the system understood the request. But the illusion broke with edge cases — the "classical" user got bossa nova with a 0.64 score and no warning that it was a bad match. The system can't distinguish between "confident recommendation" and "best of a bad set."
 
----
-
-## 7. `model_card_template.md`
-
-Combines reflection and model card framing from the Module 3 guidance. :contentReference[oaicite:2]{index=2}  
-
-```markdown
-# 🎧 Model Card - Music Recommender Simulation
-
-## 1. Model Name
-
-Give your recommender a name, for example:
-
-> VibeFinder 1.0
-
----
-
-## 2. Intended Use
-
-- What is this system trying to do
-- Who is it for
-
-Example:
-
-> This model suggests 3 to 5 songs from a small catalog based on a user's preferred genre, mood, and energy level. It is for classroom exploration only, not for real users.
-
----
-
-## 3. How It Works (Short Explanation)
-
-Describe your scoring logic in plain language.
-
-- What features of each song does it consider
-- What information about the user does it use
-- How does it turn those into a number
-
-Try to avoid code in this section, treat it like an explanation to a non programmer.
-
----
-
-## 4. Data
-
-Describe your dataset.
-
-- How many songs are in `data/songs.csv`
-- Did you add or remove any songs
-- What kinds of genres or moods are represented
-- Whose taste does this data mostly reflect
-
----
-
-## 5. Strengths
-
-Where does your recommender work well
-
-You can think about:
-- Situations where the top results "felt right"
-- Particular user profiles it served well
-- Simplicity or transparency benefits
-
----
-
-## 6. Limitations and Bias
-
-Where does your recommender struggle
-
-Some prompts:
-- Does it ignore some genres or moods
-- Does it treat all users as if they have the same taste shape
-- Is it biased toward high energy or one genre by default
-- How could this be unfair if used in a real product
-
----
-
-## 7. Evaluation
-
-How did you check your system
-
-Examples:
-- You tried multiple user profiles and wrote down whether the results matched your expectations
-- You compared your simulation to what a real app like Spotify or YouTube tends to recommend
-- You wrote tests for your scoring logic
-
-You do not need a numeric metric, but if you used one, explain what it measures.
-
----
-
-## 8. Future Work
-
-If you had more time, how would you improve this recommender
-
-Examples:
-
-- Add support for multiple users and "group vibe" recommendations
-- Balance diversity of songs instead of always picking the closest match
-- Use more features, like tempo ranges or lyric themes
-
----
-
-## 9. Personal Reflection
-
-A few sentences about what you learned:
-
-- What surprised you about how your system behaved
-- How did building this change how you think about real music recommenders
-- Where do you think human judgment still matters, even if the model seems "smart"
+**What I'd try next**: I'd implement a genre similarity matrix so that "rock" and "metal" get partial credit instead of being treated as completely unrelated. I'd also add a confidence threshold — if the best score is below 0.5, the system should say "nothing in the catalog matches well" instead of returning misleading results.
 

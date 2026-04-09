@@ -10,6 +10,8 @@
 
 This system suggests the top 3–5 songs from a small catalog based on a user's preferred genre, mood, energy level, and optional audio features. It is designed for classroom exploration in CodePath AI110, not for real users or production deployment. It assumes the user can articulate their taste as a set of feature preferences.
 
+**Non-intended use**: This system should not be used for real music streaming, commercial recommendation, or any context where users expect accurate, diverse suggestions. It has no feedback loop, no collaborative data, and an 18-song catalog — it cannot handle real-world musical diversity. Using it as a real product would create filter bubbles and exclude listeners of underrepresented genres.
+
 ---
 
 ## 3. How the Model Works
