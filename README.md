@@ -59,10 +59,6 @@ Feature-by-Feature Assessment
   so it needs normalization. Useful as a tiebreaker, not a primary signal.
 
 
-Implementation Prompt:
-- After reflecting, I want to do weighted features, which were catergorized by tiers (the exact weight it up in the air for now). Check out #file:README.md. Generate the implementation plan.
-- Without writing the implementation, generate robust test cases in the tests\test_recommender.py
-
 ## Project Summary
 
 In this project you will build and explain a small music recommender system.
@@ -80,17 +76,67 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Real-world music recommenders like Spotify use two main approaches: collaborative filtering ("users like you also liked...") and content-based filtering (matching song characteristics to your taste). This system uses **content-based filtering** — it compares each song's audio features against a user's taste profile and produces a similarity score. The key design choice is a **tier-weighted scoring system**, where not all features are treated equally. Genre, mood, and energy are weighted heaviest because they define the core "vibe" of a song, while features like danceability and tempo serve as tiebreakers. The final score is normalized to [0, 1], and the top-k songs are returned as recommendations.
 
-Some prompts to answer:
+### Song Features
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+Each `Song` carries 7 measurable features:
 
-You can include a simple diagram or bullet list if helpful.
+| Feature | Type | Role |
+|---|---|---|
+| `genre` | Categorical | Tier 1 — primary vibe filter |
+| `mood` | Categorical | Tier 1 — emotional context |
+| `energy` | Numeric (0-1) | Tier 1 — physical intensity |
+| `acousticness` | Numeric (0-1) | Tier 2 — organic vs. produced sound |
+| `valence` | Numeric (0-1) | Tier 2 — musical positivity |
+| `danceability` | Numeric (0-1) | Tier 3 — rhythmic suitability |
+| `tempo_bpm` | Numeric (60-200) | Tier 3 — speed (normalized to 0-1 for scoring) |
+
+### UserProfile Fields
+
+| Field | Type | Purpose |
+|---|---|---|
+| `favorite_genre` | str | Preferred genre to match against |
+| `favorite_mood` | str | Preferred mood to match against |
+| `target_energy` | float | Desired energy level (0-1) |
+| `likes_acoustic` | bool | Acoustic preference (converted to 0.8/0.2 for scoring) |
+| `target_valence` | float (optional) | Desired positivity level |
+| `target_danceability` | float (optional) | Desired danceability level |
+| `target_tempo_bpm` | float (optional) | Desired tempo |
+
+### Scoring
+
+The recommender scores each song by computing weighted similarity across only the features the user has specified:
+
+```
+score = sum(weight[f] * similarity(user[f], song[f])) / sum(weight[f])
+```
+
+Songs are ranked by score descending, and the top k are returned with human-readable explanations of why each song was recommended.
+
+### Data Flow
+
+```mermaid
+flowchart TD
+    A[User Profile] --> C[Scoring Loop]
+    B[songs.csv] --> C
+    C -->|For each song| D{Compute Weighted Similarity}
+    D -->|Categorical: genre, mood| E[1.0 if match, 0.0 if not]
+    D -->|Numeric: energy, valence, etc.| F["1.0 - abs(user - song)"]
+    E --> G[Multiply by tier weight]
+    F --> G
+    G --> H[Sum & normalize to 0-1 score]
+    H --> I[Sort all songs by score descending]
+    I --> J[Return top k with explanations]
+```
+
+### Expected Biases and Limitations
+
+- **Genre dominance**: Genre has the highest weight (3.0), so a genre mismatch is hard to overcome even if every other feature is a perfect match. This means the system may never recommend a great song outside the user's stated genre.
+- **Categorical rigidity**: Genre and mood use exact-match scoring — "indie pop" gets 0 similarity with "pop" even though they are closely related. Real systems use genre embeddings or hierarchies to capture partial similarity.
+- **Small catalog bias**: With only 18 songs, some genres have just one representative. A user who likes "folk" will always get the same recommendation regardless of other preferences.
+- **No discovery**: Content-based filtering inherently recommends "more of the same." It cannot surface a surprising song the way collaborative filtering can.
+- **Energy-tempo overlap**: High-energy songs tend to have high tempo and danceability, so Tier 3 features rarely change the ranking in practice — they mostly confirm what Tier 1 already decided.
 
 ---
 
