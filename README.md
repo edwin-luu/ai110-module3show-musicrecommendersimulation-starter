@@ -181,38 +181,61 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
+### Experiment 1: Weight Shift — Double Energy, Halve Genre
 
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+Changed `genre` weight from 3.0 to 1.5 and `energy` weight from 2.5 to 5.0.
+
+**Results**: For the "Deep Intense Rock" profile, "Gym Hero" (pop, intense, energy=0.93) jumped from #3 to #2, overtaking "Iron Anthem" (metal, aggressive, energy=0.97). With energy dominating the score, the system cared less that Gym Hero is pop — its near-perfect energy match carried it. This made results feel *less* genre-aware but *more* physically accurate. For chill profiles the change was minimal because lofi songs already had close energy values.
+
+**Takeaway**: Genre weight acts as a coarse filter. When you lower it, the system starts cross-pollinating genres, which can feel like discovery or feel like noise depending on the listener.
+
+### Experiment 2: Diverse Profile Testing
+
+![High-Energy Pop](s4_1.jpg)
+![Chill Lofi](s4_2.jpg)
+![Deep Intense Rock](s4_3.jpg)
+![Conflicting: High-Energy Chill](s4_4.jpg)
+![Missing Genre: Classical](s4_5.jpg)
+![Numeric Only](s4_6.jpg)
+
+| Profile | Top Pick | Surprising? |
+|---|---|---|
+| High-Energy Pop | Sunrise City (0.99) | No — perfect match |
+| Chill Lofi | Library Rain (0.99) | No — perfect match |
+| Deep Intense Rock | Storm Runner (0.99) | No — perfect match |
+| Conflicting: lofi + energy 0.95 | Midnight Coding (0.84) | Yes — genre/mood loyalty beat energy completely |
+| Missing Genre: classical | Bossa Nova Sunset (0.64) | Yes — decent fallback via mood match |
+| Numeric Only (no genre/mood) | Desert Highway (0.94) | Yes — country song wins on pure audio similarity |
+
+**Key observation**: The "Conflicting" profile revealed that genre+mood (combined weight 6.0) so heavily outweigh energy (2.5) that the system will recommend a low-energy lofi song to someone who asked for energy=0.95. This is the genre dominance bias in action.
+
+**Profile comparisons**:
+- *High-Energy Pop vs Chill Lofi*: Completely different top 5 — shows the system differentiates well when genre+mood+energy all point in different directions.
+- *Deep Intense Rock vs High-Energy Pop*: Both have high energy, but genre separates them cleanly. Gym Hero (pop, intense) appears in both lists but at different ranks.
+- *Conflicting vs Chill Lofi*: Nearly identical top 3 despite wildly different energy targets — confirms genre dominance drowns out numeric features when they conflict.
+- *Numeric Only*: Without genre/mood, the system becomes a pure audio-feature matcher. Desert Highway (country) wins because its numeric profile happens to be close — a genre the user never asked for. This shows content-based filtering can accidentally recommend outside a listener's taste when categorical anchors are missing.
 
 ---
 
 ## Limitations and Risks
 
-Summarize some limitations of your recommender.
+- **Tiny catalog**: 18 songs means many genres have only 1 representative, making recommendations repetitive.
+- **No lyric or language understanding**: A Spanish bossa nova and an English jazz song are compared purely on audio features.
+- **Genre dominance**: The system over-prioritizes genre matching. A pop song with perfect energy/mood/valence similarity to a rock listener will still rank low because genre carries weight 3.0.
+- **No partial genre matching**: "indie pop" and "pop" score 0 similarity despite being closely related. "Rock" and "metal" are treated as completely unrelated.
+- **Filter bubble**: The system only recommends "more of the same" — it cannot surprise a user with something outside their stated preferences.
 
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+See [model_card.md](model_card.md) for deeper analysis.
 
 ---
 
 ## Reflection
 
-Read and complete `model_card.md`:
-
 [**Model Card**](model_card.md)
 
-Write 1 to 2 paragraphs here about what you learned:
+Building this recommender taught me that the "algorithm" behind music recommendations is fundamentally a set of human choices disguised as math. Every weight I assigned — genre at 3.0, danceability at 0.75 — is a subjective opinion about what matters most when people pick music. The system doesn't "know" that rock and metal are related, or that a chill mood and a relaxed mood feel similar. It only knows what I told it, and the gaps in my definitions become the system's blind spots.
 
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
+The bias risks became concrete when I tested edge cases. A user who likes "classical" gets zero genre matches because classical doesn't exist in the catalog — the system doesn't fail gracefully, it just quietly gives bad recommendations with moderate confidence scores. In a real product, this would disproportionately affect listeners of underrepresented genres. The "Conflicting" profile (lofi + high energy) showed how rigid categorical matching overrides numeric signals, meaning the system would rather recommend a wrong-energy song in the right genre than a right-energy song in the wrong genre. Whether that's a feature or a bug depends on the listener — and that ambiguity is exactly where real-world recommender bias lives.
 
 
 ---
